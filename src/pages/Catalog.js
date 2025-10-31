@@ -8,20 +8,21 @@ export default function Catalog() {
   // Données simulées basées sur votre screenshot
   const mockCategories = [
     { id: 'all', name: 'Toutes les catégories' },
-    { id: 'olives', name: 'Huiles d\'olive' },
+    { id: 'olives', name: "Huiles d'olive" },
     { id: 'fruits', name: 'Fruits' },
-    { id: 'legumes', name: 'Légumes' }
+    { id: 'legumes', name: 'Légumes' },
   ];
 
   const mockProducts = [
     {
       id: 1,
       name: 'Pêches bio',
-      description: 'Des pêches bio, parfumées et juteuses, issues d\'un verger cultivé sans pesticides de synthèse.',
+      description:
+        "Des pêches bio, parfumées et juteuses, issues d'un verger cultivé sans pesticides de synthèse.",
       price: '9.500',
       category: 'fruits',
       inStock: true,
-      image: '/images/peches-bio.jpg'
+      image: '/images/peches-bio.jpg',
     },
     {
       id: 2,
@@ -30,25 +31,26 @@ export default function Catalog() {
       price: '3.500',
       category: 'fruits',
       inStock: true,
-      image: '/images/oranges-bio.jpg'
+      image: '/images/oranges-bio.jpg',
     },
     {
       id: 3,
       name: 'Carottes Bio (le kg)',
-      description: 'Des carottes bio croquantes et sucrées, cultivées dans un sol sain et exempt de traitements chimiques.',
+      description:
+        'Des carottes bio croquantes et sucrées, cultivées dans un sol sain et exempt de traitements chimiques.',
       price: '2.800',
       category: 'legumes',
       inStock: true,
-      image: '/images/carottes-bio.jpg'
+      image: '/images/carottes-bio.jpg',
     },
     {
       id: 4,
-      name: 'Huile d\'Olive Extra Vierge Bio 500ml',
-      description: 'Huile d\'olive bio 500ml première pression à froid',
+      name: "Huile d'Olive Extra Vierge Bio 500ml",
+      description: "Huile d'olive bio 500ml première pression à froid",
       price: '12.500',
       category: 'olives',
       inStock: true,
-      image: '/images/huile-olive-bio.jpg'
+      image: '/images/huile-olive-bio.jpg',
     },
     {
       id: 5,
@@ -57,7 +59,7 @@ export default function Catalog() {
       price: '4.200',
       category: 'legumes',
       inStock: true,
-      image: '/images/tomates-bio.jpg'
+      image: '/images/tomates-bio.jpg',
     },
     {
       id: 6,
@@ -66,7 +68,7 @@ export default function Catalog() {
       price: '5.500',
       category: 'fruits',
       inStock: true,
-      image: '/images/pommes-bio.jpg'
+      image: '/images/pommes-bio.jpg',
     },
     {
       id: 7,
@@ -75,7 +77,7 @@ export default function Catalog() {
       price: '3.200',
       category: 'legumes',
       inStock: true,
-      image: '/images/courgettes-bio.jpg'
+      image: '/images/courgettes-bio.jpg',
     },
     {
       id: 8,
@@ -84,26 +86,28 @@ export default function Catalog() {
       price: '7.800',
       category: 'fruits',
       inStock: true,
-      image: '/images/abricots-bio.jpg'
+      image: '/images/abricots-bio.jpg',
     },
     {
       id: 9,
-      name: 'Huile d\'Olive Vierge Bio 1L',
-      description: 'Huile d\'olive bio 1L qualité supérieure',
+      name: "Huile d'Olive Vierge Bio 1L",
+      description: "Huile d'olive bio 1L qualité supérieure",
       price: '18.500',
       category: 'olives',
       inStock: true,
-      image: '/images/huile-olive-1L.jpg'
-    }
+      image: '/images/huile-olive-1L.jpg',
+    },
   ];
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? mockProducts 
-    : mockProducts.filter(product => product.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === 'all'
+      ? mockProducts
+      : mockProducts.filter((product) => product.category === selectedCategory);
 
-  const searchedProducts = filteredProducts.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const searchedProducts = filteredProducts.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -112,16 +116,14 @@ export default function Catalog() {
       <div className="search-section">
         <div className="container">
           <div className="search-bar">
-            <input 
+            <input
               type="text"
               placeholder="Rechercher des produits..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            <button className="search-btn">
-              🔍 Rechercher
-            </button>
+            <button className="search-btn">🔍 Rechercher</button>
           </div>
         </div>
       </div>
@@ -134,10 +136,12 @@ export default function Catalog() {
               <div className="sidebar-section">
                 <h3>Catégories</h3>
                 <ul className="categories-list">
-                  {mockCategories.map(category => (
+                  {mockCategories.map((category) => (
                     <li key={category.id}>
                       <button
-                        className={`category-item ${selectedCategory === category.id ? 'active' : ''}`}
+                        className={`category-item ${
+                          selectedCategory === category.id ? 'active' : ''
+                        }`}
                         onClick={() => setSelectedCategory(category.id)}
                       >
                         {category.name}
@@ -148,37 +152,42 @@ export default function Catalog() {
               </div>
             </aside>
 
-            {/* Grille des produits - 3 colonnes avec plus d'espace */}
+            {/* Grille des produits - 3 COLONNES comme en production */}
             <main className="products-main">
               <div className="products-grid">
-                {searchedProducts.map(product => (
+                {searchedProducts.map((product) => (
                   <div key={product.id} className="product-card">
-                    {/* Image carrée */}
+                    {/* Image carrée PLUS GRANDE (300px) */}
                     <div className="product-image">
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={product.name}
                         onError={(e) => {
-                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGN0U5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM0QTdDMkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkJJTzwvdGV4dD4KPC9zdmc+';
+                          e.target.src =
+                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGN0U5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM0QTdDMkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkJJTzwvdGV4dD4KPC9zdmc+';
                         }}
                       />
                     </div>
-                    
+
                     <div className="product-info">
                       <h3 className="product-name">{product.name}</h3>
                       <p className="product-description">
                         {product.description}
                       </p>
-                      
-                      <div className="product-meta">
+
+                      <div className="product-footer">
                         <div className="product-price">{product.price} DT</div>
-                        <div className={`product-stock ${product.inStock ? 'in-stock' : 'out-of-stock'}`}>
+                        <div
+                          className={`product-stock ${
+                            product.inStock ? 'in-stock' : 'out-of-stock'
+                          }`}
+                        >
                           {product.inStock ? 'En stock' : 'Rupture'}
                         </div>
                       </div>
-                      
+
                       <button className="add-to-cart-btn">
-                        Ajouter au panier
+                        🛒 Ajouter au panier
                       </button>
                     </div>
                   </div>
@@ -195,46 +204,46 @@ export default function Catalog() {
           background: #f8f9fa;
         }
 
-        /* CONTAINER BEAUCOUP PLUS LARGE */
+        /* CONTAINER */
         .container {
-          max-width: 1600px; /* Augmenté de 1200px à 1600px */
+          max-width: 1536px;
           margin: 0 auto;
-          padding: 0 40px; /* Plus d'espace sur les côtés */
+          padding: 0 30px;
         }
 
         /* Barre de recherche */
         .search-section {
           background: linear-gradient(135deg, #4a7c2a, #e67e22);
           padding: 25px 0;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .search-bar {
           display: flex;
           gap: 15px;
-          max-width: 800px; /* Plus large */
+          max-width: 700px;
           margin: 0 auto;
         }
 
         .search-input {
           flex: 1;
-          padding: 15px 25px;
+          padding: 14px 20px;
           border: none;
-          border-radius: 30px;
-          font-size: 1.1rem;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          border-radius: 8px;
+          font-size: 1rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .search-btn {
-          padding: 15px 35px;
+          padding: 14px 30px;
           background: #2d5016;
           color: white;
           border: none;
-          border-radius: 30px;
+          border-radius: 8px;
           cursor: pointer;
           font-weight: 600;
-          font-size: 1.1rem;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          font-size: 1rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           transition: all 0.3s ease;
         }
 
@@ -243,29 +252,31 @@ export default function Catalog() {
           transform: translateY(-2px);
         }
 
-        /* Layout principal avec plus d'espace */
+        /* Layout principal */
         .catalog-layout {
           display: grid;
-          grid-template-columns: 280px 1fr; /* Sidebar un peu plus large */
-          gap: 50px; /* Plus d'espace entre sidebar et produits */
-          padding: 50px 0; /* Plus d'espace vertical */
+          grid-template-columns: 260px 1fr;
+          gap: 30px;
+          padding: 40px 0;
         }
 
         /* Sidebar */
         .categories-sidebar {
           background: white;
-          border-radius: 15px;
-          padding: 30px;
-          box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+          border-radius: 12px;
+          padding: 25px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
           height: fit-content;
+          position: sticky;
+          top: 20px;
         }
 
         .sidebar-section h3 {
-          margin: 0 0 25px 0;
+          margin: 0 0 20px 0;
           color: #2d5016;
-          font-size: 1.4rem;
-          border-bottom: 3px solid #e67e22;
-          padding-bottom: 15px;
+          font-size: 1.3rem;
+          border-bottom: 2px solid #e67e22;
+          padding-bottom: 12px;
         }
 
         .categories-list {
@@ -275,20 +286,20 @@ export default function Catalog() {
         }
 
         .categories-list li {
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
 
         .category-item {
           width: 100%;
-          padding: 16px 22px;
+          padding: 12px 18px;
           background: none;
           border: none;
           text-align: left;
           cursor: pointer;
-          border-radius: 12px;
+          border-radius: 8px;
           transition: all 0.3s ease;
           color: #555;
-          font-size: 1.05rem;
+          font-size: 1rem;
           font-weight: 500;
         }
 
@@ -301,65 +312,67 @@ export default function Catalog() {
         .category-item.active {
           background: linear-gradient(135deg, #4a7c2a, #e67e22);
           color: white;
-          box-shadow: 0 4px 15px rgba(234, 124, 34, 0.3);
+          box-shadow: 0 3px 12px rgba(234, 124, 34, 0.3);
         }
 
-        /* Grille produits - 3 colonnes avec plus d'espace */
+        /* ⭐ GRILLE PRODUITS - 3 COLONNES EXACTEMENT COMME EN PRODUCTION */
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 35px; /* Plus d'espace entre les cartes */
+          grid-template-columns: repeat(3, 1fr); /* 3 COLONNES FIXES */
+          gap: 28px;
         }
 
-        /* Carte produit plus spacieuse */
+        /* ⭐ CARTE PRODUIT - DIMENSIONS IDENTIQUES À LA PRODUCTION */
         .product-card {
           background: white;
-          border-radius: 18px;
+          border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
           transition: all 0.3s ease;
-          height: 520px; /* Encore plus haute */
+          height: 580px; /* Hauteur totale comme en production */
           display: flex;
           flex-direction: column;
         }
 
         .product-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+          transform: translateY(-6px);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
 
-        /* Image carrée plus grande */
+        /* ⭐ IMAGE CARRÉE 300PX - EXACTEMENT COMME EN PRODUCTION */
         .product-image {
-          height: 250px; /* Encore plus grand */
+          height: 300px; /* IMAGE PLUS GRANDE */
           width: 100%;
           background: linear-gradient(135deg, #f0f7e9, #ffe6d5);
           display: flex;
           align-items: center;
           justify-content: center;
           overflow: hidden;
+          border-radius: 16px 16px 0 0; /* Coins arrondis en haut */
         }
 
         .product-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.3s ease;
+          transition: transform 0.4s ease;
         }
 
         .product-card:hover .product-image img {
-          transform: scale(1.05);
+          transform: scale(1.08);
         }
 
+        /* CONTENU DE LA CARTE */
         .product-info {
-          padding: 30px;
+          padding: 24px;
           flex: 1;
           display: flex;
           flex-direction: column;
         }
 
         .product-name {
-          margin: 0 0 15px 0;
-          font-size: 1.4rem;
+          margin: 0 0 12px 0;
+          font-size: 1.25rem;
           color: #2d5016;
           font-weight: 700;
           line-height: 1.3;
@@ -367,38 +380,38 @@ export default function Catalog() {
 
         .product-description {
           color: #666;
-          font-size: 1rem;
-          line-height: 1.6;
-          margin-bottom: 25px;
+          font-size: 0.95rem;
+          line-height: 1.5;
+          margin-bottom: 20px;
           flex: 1;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
-        .product-meta {
+        .product-footer {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 25px;
+          margin-bottom: 18px;
         }
 
         .product-price {
-          font-size: 1.6rem;
+          font-size: 1.5rem;
           font-weight: bold;
-          color: #e67e22;
-          background: linear-gradient(135deg, #e67e22, #ff8c42);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #16a34a;
         }
 
         .product-stock {
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           font-weight: 600;
-          padding: 7px 14px;
+          padding: 6px 12px;
           border-radius: 20px;
         }
 
         .product-stock.in-stock {
-          color: #27ae60;
+          color: #16a34a;
           background: #e8f6ef;
         }
 
@@ -407,94 +420,93 @@ export default function Catalog() {
           background: #fde8e6;
         }
 
+        /* ⭐ BOUTON VERT COMME EN PRODUCTION */
         .add-to-cart-btn {
           width: 100%;
-          padding: 18px;
-          background: linear-gradient(135deg, #4a7c2a, #e67e22);
+          padding: 14px;
+          background: #16a34a; /* Vert identique à la production */
           color: white;
           border: none;
-          border-radius: 12px;
+          border-radius: 8px;
           cursor: pointer;
-          font-size: 1.1rem;
-          font-weight: 700;
+          font-size: 1rem;
+          font-weight: 600;
           transition: all 0.3s ease;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
 
         .add-to-cart-btn:hover {
-          background: linear-gradient(135deg, #3a641a, #d35400);
+          background: #15803d;
           transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(234, 124, 34, 0.4);
+          box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
         }
 
-        /* Responsive pour très grands écrans */
-        @media (min-width: 1800px) {
-          .container {
-            max-width: 1700px;
-          }
-          
-          .products-grid {
-            grid-template-columns: repeat(4, 1fr); /* 4 colonnes sur très grands écrans */
-          }
-        }
+        /* ⭐ RESPONSIVE - IDENTIQUE À LA PRODUCTION */
 
-        @media (max-width: 1400px) {
-          .container {
-            max-width: 1300px;
-          }
-          
+        /* Grands écrans - 3 colonnes */
+        @media (min-width: 1200px) {
           .products-grid {
             grid-template-columns: repeat(3, 1fr);
           }
         }
 
-        @media (max-width: 1200px) {
+        /* Tablettes - 2 colonnes */
+        @media (max-width: 1199px) {
           .container {
             max-width: 1100px;
           }
-          
+
           .products-grid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
+        /* Petits écrans - sidebar en haut */
         @media (max-width: 968px) {
           .catalog-layout {
             grid-template-columns: 1fr;
-            gap: 30px;
+            gap: 25px;
           }
-          
+
           .categories-sidebar {
-            order: 2;
-          }
-          
-          .products-main {
+            position: static;
             order: 1;
           }
-          
+
+          .products-main {
+            order: 2;
+          }
+
           .products-grid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
+        /* Mobile - 1 colonne */
         @media (max-width: 768px) {
           .container {
-            max-width: 100%;
             padding: 0 20px;
           }
-          
+
           .search-bar {
             flex-direction: column;
           }
-          
+
           .products-grid {
             grid-template-columns: 1fr;
+            gap: 20px;
           }
-          
+
           .product-card {
             height: auto;
-            min-height: 480px;
+            min-height: 500px;
+          }
+
+          .product-image {
+            height: 280px;
           }
         }
 
@@ -502,13 +514,17 @@ export default function Catalog() {
           .container {
             padding: 0 15px;
           }
-          
+
           .product-card {
             height: auto;
           }
-          
+
           .product-image {
-            height: 220px;
+            height: 250px;
+          }
+
+          .product-info {
+            padding: 20px;
           }
         }
       `}</style>
