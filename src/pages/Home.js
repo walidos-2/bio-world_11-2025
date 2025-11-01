@@ -1,9 +1,11 @@
-import API_URL from '../config';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import axios from 'axios';
 import { ArrowRight, ShoppingBag } from 'lucide-react';
+
+// Configuration API
+const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 const Home = () => {
   const { language, t } = useLanguage();
@@ -19,11 +21,12 @@ const Home = () => {
     try {
       const [productsRes, categoriesRes] = await Promise.all([
         axios.get(`${API_URL}/products?featured=true`),
-        axios.get(`${API_URL}/categories`)
+        axios.get(`${API_URL}/categories`),
       ]);
-      
-      setFeaturedProducts(productsRes.data.slice(0, 4));
-      setCategories(categoriesRes.data.filter(cat => !cat.parent_id));
+
+      // ✅ CORRIGÉ : Afficher 8 produits au lieu de 4
+      setFeaturedProducts(productsRes.data.slice(0, 8));
+      setCategories(categoriesRes.data.filter((cat) => !cat.parent_id));
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -38,14 +41,19 @@ const Home = () => {
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6" data-testid="hero-title">
+            <h1
+              className="text-5xl md:text-6xl font-bold mb-6"
+              data-testid="hero-title"
+            >
               Happyness Bio World
             </h1>
             <p className="text-xl mb-4" data-testid="hero-description">
               {t('home.hero.description')}
             </p>
             <p className="text-lg font-medium italic mb-8">
-              {language === 'fr' ? 'La Joie de se Reconnecter avec la Nature Saine' : 'The Joy of Reconnecting with Healthy Nature'}
+              {language === 'fr'
+                ? 'La Joie de se Reconnecter avec la Nature Saine'
+                : 'The Joy of Reconnecting with Healthy Nature'}
             </p>
             <Link
               to="/catalog"
@@ -77,15 +85,39 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {categories.map(category => (
+              {categories.map((category) => (
                 <Link
                   key={category.id}
-                  to={`/catalog?category=${category.id}`}
+                  to={`/catalog?category_id=${category.id}`}
                   className="group bg-gray-50 dark:bg-gray-900 rounded-xl p-8 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-600"
                   data-testid={`category-card-${category.slug}`}
                 >
                   <div className="text-center">
-                    <div className="text-5xl mb-4">🌿</div>
+                    {/* ✅ MODIFIÉ : Affichage de l'image si disponible, sinon emoji par défaut */}
+                    {category.image_url ? (
+                      <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-br from-green-100 to-orange-100 dark:from-green-900 dark:to-orange-900 p-2 group-hover:scale-110 transition-transform duration-300">
+                        <img
+                          src={category.image_url}
+                          alt={
+                            language === 'fr'
+                              ? category.name_fr
+                              : category.name_en
+                          }
+                          className="w-full h-full object-cover rounded-full"
+                          onError={(e) => {
+                            // Si l'image ne charge pas, masquer l'img et afficher l'emoji
+                            e.target.style.display = 'none';
+                            const parent = e.target.parentElement;
+                            parent.innerHTML =
+                              '<div class="text-5xl flex items-center justify-center h-full">🌿</div>';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                        🌿
+                      </div>
+                    )}
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                       {language === 'fr' ? category.name_fr : category.name_en}
                     </h3>
@@ -113,9 +145,17 @@ const Home = () => {
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent"></div>
             </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                {language === 'fr'
+                  ? 'Aucun produit phare pour le moment'
+                  : 'No featured products yet'}
+              </p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map(product => (
+              {featuredProducts.map((product) => (
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
@@ -123,10 +163,12 @@ const Home = () => {
                   data-testid={`product-card-${product.slug}`}
                 >
                   <div className="aspect-square overflow-hidden bg-gray-200 dark:bg-gray-700">
-                    {product.images.length > 0 ? (
+                    {product.images && product.images.length > 0 ? (
                       <img
                         src={product.images[0]}
-                        alt={language === 'fr' ? product.name_fr : product.name_en}
+                        alt={
+                          language === 'fr' ? product.name_fr : product.name_en
+                        }
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : (
@@ -140,14 +182,18 @@ const Home = () => {
                       {language === 'fr' ? product.name_fr : product.name_en}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                      {language === 'fr' ? product.short_description_fr : product.short_description_en}
+                      {language === 'fr'
+                        ? product.short_description_fr
+                        : product.short_description_en}
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                         {product.price.toFixed(3)} DT
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {product.in_stock ? t('catalog.inStock') : t('catalog.onOrder')}
+                        {product.in_stock
+                          ? t('catalog.inStock')
+                          : t('catalog.onOrder')}
                       </span>
                     </div>
                   </div>

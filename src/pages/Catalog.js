@@ -1,16 +1,29 @@
 // pages/Catalog.js
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 // Configuration de l'API
 const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 export default function Catalog() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get('category_id');
+
+  const [selectedCategory, setSelectedCategory] = useState(
+    categoryFromUrl || 'all'
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Mettre à jour selectedCategory quand l'URL change
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [categoryFromUrl]);
 
   // Charger les catégories
   useEffect(() => {

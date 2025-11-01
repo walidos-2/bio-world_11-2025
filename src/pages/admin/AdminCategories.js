@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import API_URL from '../../config';
 import { Edit2, Trash2, Plus, FolderTree } from 'lucide-react';
+import ImageUploader from '../../components/ImageUploader';
 
 const AdminCategories = () => {
   const { language, t } = useLanguage();
@@ -16,8 +17,11 @@ const AdminCategories = () => {
     name_fr: '',
     name_en: '',
     slug: '',
+    description_fr: '',
+    description_en: '',
+    image_url: '', // ✅ AJOUTÉ pour l'image
     parent_id: '',
-    order: 0
+    order: 0,
   });
 
   useEffect(() => {
@@ -42,8 +46,11 @@ const AdminCategories = () => {
         name_fr: category.name_fr,
         name_en: category.name_en,
         slug: category.slug,
+        description_fr: category.description_fr || '',
+        description_en: category.description_en || '',
+        image_url: category.image_url || '', // ✅ AJOUTÉ
         parent_id: category.parent_id || '',
-        order: category.order
+        order: category.order,
       });
     } else {
       setEditingCategory(null);
@@ -51,8 +58,11 @@ const AdminCategories = () => {
         name_fr: '',
         name_en: '',
         slug: '',
+        description_fr: '',
+        description_en: '',
+        image_url: '', // ✅ AJOUTÉ
         parent_id: '',
-        order: 0
+        order: 0,
       });
     }
     setShowModal(true);
@@ -65,9 +75,9 @@ const AdminCategories = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -82,10 +92,19 @@ const AdminCategories = () => {
 
   const handleNameChange = (e) => {
     const value = e.target.value;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       name_fr: value,
-      slug: generateSlug(value)
+      slug: generateSlug(value),
+    }));
+  };
+
+  // ✅ NOUVEAU : Handler pour l'image
+  const handleImageChange = (images) => {
+    // ImageUploader renvoie un tableau, on ne prend que la première image
+    setFormData((prev) => ({
+      ...prev,
+      image_url: images.length > 0 ? images[0] : '',
     }));
   };
 
@@ -94,41 +113,60 @@ const AdminCategories = () => {
 
     try {
       if (editingCategory) {
-        await axios.put(`${API_URL}/categories/${editingCategory.id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.put(
+          `${API_URL}/categories/${editingCategory.id}`,
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       } else {
         await axios.post(`${API_URL}/categories`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
-      
+
       fetchCategories();
       handleCloseModal();
     } catch (error) {
       console.error('Error saving category:', error);
-      alert(language === 'fr' ? 'Erreur lors de l\'enregistrement' : 'Error saving category');
+      alert(
+        language === 'fr'
+          ? "Erreur lors de l'enregistrement"
+          : 'Error saving category'
+      );
     }
   };
 
   const handleDelete = async (categoryId) => {
-    if (!window.confirm(language === 'fr' ? 'Êtes-vous sûr de vouloir supprimer cette catégorie ?' : 'Are you sure you want to delete this category?')) {
+    if (
+      !window.confirm(
+        language === 'fr'
+          ? 'Êtes-vous sûr de vouloir supprimer cette catégorie ?'
+          : 'Are you sure you want to delete this category?'
+      )
+    ) {
       return;
     }
 
     try {
       await axios.delete(`${API_URL}/categories/${categoryId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setCategories(categories.filter(c => c.id !== categoryId));
+      setCategories(categories.filter((c) => c.id !== categoryId));
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert(language === 'fr' ? 'Erreur lors de la suppression' : 'Error deleting category');
+      alert(
+        language === 'fr'
+          ? 'Erreur lors de la suppression'
+          : 'Error deleting category'
+      );
     }
   };
 
-  const mainCategories = categories.filter(cat => !cat.parent_id);
-  const getSubcategories = (parentId) => categories.filter(cat => cat.parent_id === parentId);
+  const mainCategories = categories.filter((cat) => !cat.parent_id);
+  const getSubcategories = (parentId) =>
+    categories.filter((cat) => cat.parent_id === parentId);
 
   if (loading) {
     return (
@@ -159,13 +197,18 @@ const AdminCategories = () => {
           <div className="bg-white dark:bg-gray-900 rounded-lg p-12 shadow-md text-center">
             <FolderTree size={64} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              {language === 'fr' ? 'Aucune catégorie pour le moment' : 'No categories yet'}
+              {language === 'fr'
+                ? 'Aucune catégorie pour le moment'
+                : 'No categories yet'}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {mainCategories.map(category => (
-              <div key={category.id} className="bg-white dark:bg-gray-900 rounded-lg shadow-md">
+            {mainCategories.map((category) => (
+              <div
+                key={category.id}
+                className="bg-white dark:bg-gray-900 rounded-lg shadow-md"
+              >
                 <div className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -199,13 +242,15 @@ const AdminCategories = () => {
                       {language === 'fr' ? 'Sous-catégories' : 'Subcategories'}:
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {getSubcategories(category.id).map(subcat => (
+                      {getSubcategories(category.id).map((subcat) => (
                         <div
                           key={subcat.id}
                           className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-md"
                         >
                           <span className="text-sm text-gray-700 dark:text-gray-300">
-                            {language === 'fr' ? subcat.name_fr : subcat.name_en}
+                            {language === 'fr'
+                              ? subcat.name_fr
+                              : subcat.name_en}
                           </span>
                           <div className="flex items-center gap-2">
                             <button
@@ -238,15 +283,20 @@ const AdminCategories = () => {
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   {editingCategory
-                    ? (language === 'fr' ? 'Modifier la catégorie' : 'Edit Category')
-                    : (language === 'fr' ? 'Ajouter une catégorie' : 'Add Category')}
+                    ? language === 'fr'
+                      ? 'Modifier la catégorie'
+                      : 'Edit Category'
+                    : language === 'fr'
+                    ? 'Ajouter une catégorie'
+                    : 'Add Category'}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {language === 'fr' ? 'Nom (Français)' : 'Name (French)'} *
+                        {language === 'fr' ? 'Nom (Français)' : 'Name (French)'}{' '}
+                        *
                       </label>
                       <input
                         type="text"
@@ -260,7 +310,8 @@ const AdminCategories = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {language === 'fr' ? 'Nom (Anglais)' : 'Name (English)'} *
+                        {language === 'fr' ? 'Nom (Anglais)' : 'Name (English)'}{' '}
+                        *
                       </label>
                       <input
                         type="text"
@@ -287,9 +338,75 @@ const AdminCategories = () => {
                     />
                   </div>
 
+                  {/* ✅ NOUVEAU : Description FR */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {language === 'fr' ? 'Catégorie parente' : 'Parent Category'}
+                      {language === 'fr'
+                        ? 'Description (Français)'
+                        : 'Description (French)'}{' '}
+                      <span className="text-gray-500 text-xs">(optionnel)</span>
+                    </label>
+                    <textarea
+                      name="description_fr"
+                      value={formData.description_fr}
+                      onChange={handleChange}
+                      rows={3}
+                      placeholder={
+                        language === 'fr'
+                          ? 'Description détaillée en français...'
+                          : 'Detailed description in French...'
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  {/* ✅ NOUVEAU : Description EN */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {language === 'fr'
+                        ? 'Description (Anglais)'
+                        : 'Description (English)'}{' '}
+                      <span className="text-gray-500 text-xs">(optionnel)</span>
+                    </label>
+                    <textarea
+                      name="description_en"
+                      value={formData.description_en}
+                      onChange={handleChange}
+                      rows={3}
+                      placeholder={
+                        language === 'fr'
+                          ? 'Description détaillée en anglais...'
+                          : 'Detailed description in English...'
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  {/* ✅ NOUVEAU : Image de la catégorie */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                      {language === 'fr'
+                        ? 'Image de la catégorie'
+                        : 'Category Image'}{' '}
+                      <span className="text-gray-500 text-xs">(optionnel)</span>
+                    </label>
+                    <ImageUploader
+                      images={formData.image_url ? [formData.image_url] : []}
+                      onChange={handleImageChange}
+                      language={language}
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      {language === 'fr'
+                        ? 'Une seule image sera utilisée. Si plusieurs sont uploadées, seule la première sera conservée.'
+                        : 'Only one image will be used. If multiple are uploaded, only the first will be kept.'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {language === 'fr'
+                        ? 'Catégorie parente'
+                        : 'Parent Category'}
                     </label>
                     <select
                       name="parent_id"
@@ -297,10 +414,17 @@ const AdminCategories = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
                     >
-                      <option value="">{language === 'fr' ? 'Aucune (catégorie principale)' : 'None (main category)'}</option>
+                      <option value="">
+                        {language === 'fr'
+                          ? 'Aucune (catégorie principale)'
+                          : 'None (main category)'}
+                      </option>
                       {mainCategories
-                        .filter(cat => !editingCategory || cat.id !== editingCategory.id)
-                        .map(cat => (
+                        .filter(
+                          (cat) =>
+                            !editingCategory || cat.id !== editingCategory.id
+                        )
+                        .map((cat) => (
                           <option key={cat.id} value={cat.id}>
                             {language === 'fr' ? cat.name_fr : cat.name_en}
                           </option>
@@ -310,7 +434,9 @@ const AdminCategories = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {language === 'fr' ? 'Ordre d\'affichage' : 'Display Order'}
+                      {language === 'fr'
+                        ? "Ordre d'affichage"
+                        : 'Display Order'}
                     </label>
                     <input
                       type="number"

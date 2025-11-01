@@ -141,11 +141,11 @@ const ProductForm = () => {
         price: parseFloat(formData.price),
         category_id: formData.category_id,
         subcategory_id: formData.subcategory_id || null,
-        images: formData.images, // CHANGEMENT: directement le tableau
+        images: formData.images,
         mascot_icon: formData.mascot_icon || null,
-        in_stock: formData.in_stock,
-        available_on_order: formData.available_on_order,
-        featured: formData.featured,
+        in_stock: formData.in_stock ? 1 : 0, // ✅ Conversion bool → int
+        available_on_order: formData.available_on_order ? 1 : 0, // ✅ Conversion bool → int
+        featured: formData.featured ? 1 : 0, // ✅ Conversion bool → int
         meta_title_fr: formData.meta_title_fr || null,
         meta_title_en: formData.meta_title_en || null,
         meta_description_fr: formData.meta_description_fr || null,
