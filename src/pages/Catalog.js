@@ -1,113 +1,65 @@
-// components/Catalog.js
+// pages/Catalog.js
 import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+// Configuration de l'API
+const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 export default function Catalog() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Données simulées basées sur votre screenshot
-  const mockCategories = [
-    { id: 'all', name: 'Toutes les catégories' },
-    { id: 'olives', name: "Huiles d'olive" },
-    { id: 'fruits', name: 'Fruits' },
-    { id: 'legumes', name: 'Légumes' },
-  ];
+  // Charger les catégories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/categories`);
+        setCategories([
+          {
+            id: 'all',
+            name_fr: 'Toutes les catégories',
+            name_en: 'All categories',
+          },
+          ...response.data,
+        ]);
+      } catch (error) {
+        console.error('Erreur chargement catégories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const mockProducts = [
-    {
-      id: 1,
-      name: 'Pêches bio',
-      description:
-        "Des pêches bio, parfumées et juteuses, issues d'un verger cultivé sans pesticides de synthèse.",
-      price: '9.500',
-      category: 'fruits',
-      inStock: true,
-      image: '/images/peches-bio.jpg',
-    },
-    {
-      id: 2,
-      name: 'Oranges Bio (le kg)',
-      description: 'Orange bio juteuses, cultivées sans pesticides.',
-      price: '3.500',
-      category: 'fruits',
-      inStock: true,
-      image: '/images/oranges-bio.jpg',
-    },
-    {
-      id: 3,
-      name: 'Carottes Bio (le kg)',
-      description:
-        'Des carottes bio croquantes et sucrées, cultivées dans un sol sain et exempt de traitements chimiques.',
-      price: '2.800',
-      category: 'legumes',
-      inStock: true,
-      image: '/images/carottes-bio.jpg',
-    },
-    {
-      id: 4,
-      name: "Huile d'Olive Extra Vierge Bio 500ml",
-      description: "Huile d'olive bio 500ml première pression à froid",
-      price: '12.500',
-      category: 'olives',
-      inStock: true,
-      image: '/images/huile-olive-bio.jpg',
-    },
-    {
-      id: 5,
-      name: 'Tomates Bio (le kg)',
-      description: 'Tomates bio savoureuses cultivées au soleil',
-      price: '4.200',
-      category: 'legumes',
-      inStock: true,
-      image: '/images/tomates-bio.jpg',
-    },
-    {
-      id: 6,
-      name: 'Pommes Bio (le kg)',
-      description: 'Pommes bio croquantes et sucrées de saison',
-      price: '5.500',
-      category: 'fruits',
-      inStock: true,
-      image: '/images/pommes-bio.jpg',
-    },
-    {
-      id: 7,
-      name: 'Courgettes Bio (le kg)',
-      description: 'Courgettes bio fraîches et tendres',
-      price: '3.200',
-      category: 'legumes',
-      inStock: true,
-      image: '/images/courgettes-bio.jpg',
-    },
-    {
-      id: 8,
-      name: 'Abricots Bio (le kg)',
-      description: 'Abricots bio sucrés et parfumés',
-      price: '7.800',
-      category: 'fruits',
-      inStock: true,
-      image: '/images/abricots-bio.jpg',
-    },
-    {
-      id: 9,
-      name: "Huile d'Olive Vierge Bio 1L",
-      description: "Huile d'olive bio 1L qualité supérieure",
-      price: '18.500',
-      category: 'olives',
-      inStock: true,
-      image: '/images/huile-olive-1L.jpg',
-    },
-  ];
+  // Charger les produits
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const url =
+          selectedCategory === 'all'
+            ? `${API_URL}/products`
+            : `${API_URL}/products?category_id=${selectedCategory}`;
 
-  const filteredProducts =
-    selectedCategory === 'all'
-      ? mockProducts
-      : mockProducts.filter((product) => product.category === selectedCategory);
+        const response = await axios.get(url);
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Erreur chargement produits:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [selectedCategory]);
 
-  const searchedProducts = filteredProducts.filter(
+  // Filtrer par recherche
+  const searchedProducts = products.filter(
     (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      product.name_fr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.short_description_fr
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -136,69 +88,111 @@ export default function Catalog() {
               <div className="sidebar-section">
                 <h3>Catégories</h3>
                 <ul className="categories-list">
-                  {mockCategories.map((category) => (
-                    <li key={category.id}>
-                      <button
-                        className={`category-item ${
-                          selectedCategory === category.id ? 'active' : ''
-                        }`}
-                        onClick={() => setSelectedCategory(category.id)}
-                      >
-                        {category.name}
-                      </button>
-                    </li>
-                  ))}
+                  {categories
+                    .filter((cat) => !cat.parent_id) // Seulement catégories principales
+                    .map((category) => (
+                      <li key={category.id}>
+                        <button
+                          className={`category-item ${
+                            selectedCategory === category.id ? 'active' : ''
+                          }`}
+                          onClick={() => setSelectedCategory(category.id)}
+                        >
+                          {category.name_fr}
+                        </button>
+                      </li>
+                    ))}
                 </ul>
               </div>
             </aside>
 
-            {/* Grille des produits - 3 COLONNES comme en production */}
+            {/* Grille des produits */}
             <main className="products-main">
-              <div className="products-grid">
-                {searchedProducts.map((product) => (
-                  <div key={product.id} className="product-card">
-                    {/* Image carrée PLUS GRANDE (300px) */}
-                    <div className="product-image">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        onError={(e) => {
-                          e.target.src =
-                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGN0U5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM0QTdDMkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkJJTzwvdGV4dD4KPC9zdmc+';
-                        }}
-                      />
-                    </div>
-
-                    <div className="product-info">
-                      <h3 className="product-name">{product.name}</h3>
-                      <p className="product-description">
-                        {product.description}
-                      </p>
-
-                      <div className="product-footer">
-                        <div className="product-price">{product.price} DT</div>
-                        <div
-                          className={`product-stock ${
-                            product.inStock ? 'in-stock' : 'out-of-stock'
-                          }`}
-                        >
-                          {product.inStock ? 'En stock' : 'Rupture'}
-                        </div>
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                  <div
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      border: '4px solid #f0f7e9',
+                      borderTop: '4px solid #16a249',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      margin: '0 auto 20px',
+                    }}
+                  ></div>
+                  <p style={{ color: '#666', fontSize: '1.1rem' }}>
+                    Chargement des produits...
+                  </p>
+                </div>
+              ) : searchedProducts.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                  <p style={{ color: '#666', fontSize: '1.2rem' }}>
+                    Aucun produit trouvé
+                  </p>
+                </div>
+              ) : (
+                <div className="products-grid">
+                  {searchedProducts.map((product) => (
+                    <div key={product.id} className="product-card">
+                      {/* Image - CORRIGÉ : utilise images[0] au lieu de image */}
+                      <div className="product-image">
+                        <img
+                          src={
+                            product.images && product.images.length > 0
+                              ? product.images[0]
+                              : ''
+                          }
+                          alt={product.name_fr}
+                          onError={(e) => {
+                            e.target.src =
+                              'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGN0U5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM0QTdDMkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkJJTzwvdGV4dD4KPC9zdmc+';
+                          }}
+                        />
                       </div>
 
-                      <button className="add-to-cart-btn">
-                        🛒 Ajouter au panier
-                      </button>
+                      <div className="product-info">
+                        <h3 className="product-name">{product.name_fr}</h3>
+                        <p className="product-description">
+                          {product.short_description_fr}
+                        </p>
+
+                        <div className="product-meta">
+                          <div className="product-price">
+                            {product.price.toFixed(3)} DT
+                          </div>
+                          <div
+                            className={`product-stock ${
+                              product.in_stock ? 'in-stock' : 'out-of-stock'
+                            }`}
+                          >
+                            {product.in_stock ? 'En stock' : 'Sur commande'}
+                          </div>
+                        </div>
+
+                        <button className="add-to-cart-btn">
+                          Ajouter au panier
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </main>
           </div>
         </div>
       </div>
 
       <style jsx>{`
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
         .catalog-page {
           min-height: 100vh;
           background: #f8f9fa;
@@ -315,21 +309,21 @@ export default function Catalog() {
           box-shadow: 0 3px 12px rgba(234, 124, 34, 0.3);
         }
 
-        /* ⭐ GRILLE PRODUITS - 3 COLONNES EXACTEMENT COMME EN PRODUCTION */
+        /* Grille produits - 3 colonnes */
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr); /* 3 COLONNES FIXES */
+          grid-template-columns: repeat(3, 1fr);
           gap: 28px;
         }
 
-        /* ⭐ CARTE PRODUIT - DIMENSIONS IDENTIQUES À LA PRODUCTION */
+        /* Carte produit */
         .product-card {
           background: white;
           border-radius: 16px;
           overflow: hidden;
           box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
           transition: all 0.3s ease;
-          height: 580px; /* Hauteur totale comme en production */
+          height: 580px;
           display: flex;
           flex-direction: column;
         }
@@ -339,16 +333,16 @@ export default function Catalog() {
           box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
 
-        /* ⭐ IMAGE CARRÉE 300PX - EXACTEMENT COMME EN PRODUCTION */
+        /* Image 300px */
         .product-image {
-          height: 300px; /* IMAGE PLUS GRANDE */
+          height: 300px;
           width: 100%;
           background: linear-gradient(135deg, #f0f7e9, #ffe6d5);
           display: flex;
           align-items: center;
           justify-content: center;
           overflow: hidden;
-          border-radius: 16px 16px 0 0; /* Coins arrondis en haut */
+          border-radius: 16px 16px 0 0;
         }
 
         .product-image img {
@@ -362,7 +356,6 @@ export default function Catalog() {
           transform: scale(1.08);
         }
 
-        /* CONTENU DE LA CARTE */
         .product-info {
           padding: 24px;
           flex: 1;
@@ -390,7 +383,7 @@ export default function Catalog() {
           overflow: hidden;
         }
 
-        .product-footer {
+        .product-meta {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -420,11 +413,10 @@ export default function Catalog() {
           background: #fde8e6;
         }
 
-        /* ⭐ BOUTON VERT COMME EN PRODUCTION */
         .add-to-cart-btn {
           width: 100%;
           padding: 14px;
-          background: #16a34a; /* Vert identique à la production */
+          background: #16a34a;
           color: white;
           border: none;
           border-radius: 8px;
@@ -444,16 +436,13 @@ export default function Catalog() {
           box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
         }
 
-        /* ⭐ RESPONSIVE - IDENTIQUE À LA PRODUCTION */
-
-        /* Grands écrans - 3 colonnes */
+        /* Responsive */
         @media (min-width: 1200px) {
           .products-grid {
             grid-template-columns: repeat(3, 1fr);
           }
         }
 
-        /* Tablettes - 2 colonnes */
         @media (max-width: 1199px) {
           .container {
             max-width: 1100px;
@@ -464,7 +453,6 @@ export default function Catalog() {
           }
         }
 
-        /* Petits écrans - sidebar en haut */
         @media (max-width: 968px) {
           .catalog-layout {
             grid-template-columns: 1fr;
@@ -485,7 +473,6 @@ export default function Catalog() {
           }
         }
 
-        /* Mobile - 1 colonne */
         @media (max-width: 768px) {
           .container {
             padding: 0 20px;
