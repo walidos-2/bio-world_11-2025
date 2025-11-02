@@ -1,197 +1,276 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Mail, Phone, MapPin, User } from 'lucide-react';
+import axios from 'axios';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 const Contact = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
+  const [settings, setSettings] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
   });
-  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/settings`);
+      setSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate form submission
-    setSubmitted(true);
+    setLoading(true);
+
+    // Simulation d'envoi (vous pouvez implémenter l'envoi d'email via backend)
     setTimeout(() => {
-      setSubmitted(false);
+      setSuccess(true);
+      setLoading(false);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 3000);
+
+      setTimeout(() => setSuccess(false), 5000);
+    }, 1000);
   };
 
+  const t = {
+    fr: {
+      title: 'Contactez-nous',
+      subtitle: "Une question ? N'hésitez pas à nous contacter",
+      nameLabel: 'Nom complet',
+      namePlaceholder: 'Votre nom',
+      emailLabel: 'Email',
+      emailPlaceholder: 'votre@email.com',
+      subjectLabel: 'Sujet',
+      subjectPlaceholder: 'Objet de votre message',
+      messageLabel: 'Message',
+      messagePlaceholder: 'Votre message...',
+      sendButton: 'Envoyer',
+      sending: 'Envoi...',
+      successMessage:
+        'Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.',
+      contactInfo: 'Nos coordonnées',
+      address: 'Adresse',
+      phone: 'Téléphone',
+      email: 'Email',
+    },
+    en: {
+      title: 'Contact Us',
+      subtitle: 'Have a question? Feel free to contact us',
+      nameLabel: 'Full Name',
+      namePlaceholder: 'Your name',
+      emailLabel: 'Email',
+      emailPlaceholder: 'your@email.com',
+      subjectLabel: 'Subject',
+      subjectPlaceholder: 'Subject of your message',
+      messageLabel: 'Message',
+      messagePlaceholder: 'Your message...',
+      sendButton: 'Send',
+      sending: 'Sending...',
+      successMessage:
+        'Message sent successfully! We will respond as soon as possible.',
+      contactInfo: 'Contact Information',
+      address: 'Address',
+      phone: 'Phone',
+      email: 'Email',
+    },
+  };
+
+  const translations = t[language] || t.fr;
+
   return (
-    <div className="py-12" data-testid="contact-page">
+    <div className="py-16">
       <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-5xl font-bold text-center text-gray-900 dark:text-white mb-6">
-            {t('footer.contact')}
-          </h1>
-          <p className="text-xl text-center text-gray-600 dark:text-gray-400 mb-12">
-            {language === 'fr'
-              ? 'Nous sommes à votre écoute'
-              : 'We are here to listen'}
-          </p>
+        <div className="max-w-6xl mx-auto">
+          {/* En-tête */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              {translations.title}
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400">
+              {translations.subtitle}
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Info */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                {language === 'fr' ? 'Nos Coordonnées' : 'Contact Information'}
-              </h2>
-
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <Mail className="text-green-600 dark:text-green-400" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      Email
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Happybioworld@hexabyte.tn
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <Phone className="text-green-600 dark:text-green-400" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      {language === 'fr' ? 'Téléphone' : 'Phone'}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      +216 27 092 610
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <MapPin className="text-green-600 dark:text-green-400" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      {language === 'fr' ? 'Adresse' : 'Address'}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Happyness Bio World<br />
-                      26 Rue d'Egypte<br />
-                      1002 Tunis, Tunisie
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                    <User className="text-orange-600 dark:text-orange-400" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      {language === 'fr' ? 'Directeur Technique' : 'Technical Manager'}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      IHEB GHOUILI
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                {language === 'fr' ? 'Envoyez-nous un message' : 'Send us a message'}
-              </h2>
-
-              {submitted && (
-                <div className="mb-4 p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-md">
-                  {language === 'fr'
-                    ? 'Votre message a été envoyé avec succès !'
-                    : 'Your message has been sent successfully!'}
+            {/* Formulaire */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8">
+              {success && (
+                <div className="mb-6 p-4 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-lg">
+                  {translations.successMessage}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Nom */}
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'fr' ? 'Nom' : 'Name'}
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {translations.nameLabel} *
                   </label>
                   <input
                     type="text"
-                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    placeholder={translations.namePlaceholder}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
                   />
                 </div>
 
+                {/* Email */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {translations.emailLabel} *
                   </label>
                   <input
                     type="email"
-                    id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    placeholder={translations.emailPlaceholder}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
                   />
                 </div>
 
+                {/* Sujet */}
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {language === 'fr' ? 'Sujet' : 'Subject'}
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {translations.subjectLabel} *
                   </label>
                   <input
                     type="text"
-                    id="subject"
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    placeholder={translations.subjectPlaceholder}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
                   />
                 </div>
 
+                {/* Message */}
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Message
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {translations.messageLabel} *
                   </label>
                   <textarea
-                    id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     required
                     rows={6}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                  ></textarea>
+                    placeholder={translations.messagePlaceholder}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent resize-none"
+                  />
                 </div>
 
+                {/* Bouton */}
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-md font-semibold transition-colors"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-orange-500 hover:from-green-700 hover:to-orange-600 disabled:from-gray-400 disabled:to-gray-400 text-white rounded-lg font-semibold transition-colors"
                 >
-                  {language === 'fr' ? 'Envoyer' : 'Send'}
+                  <Send size={20} />
+                  {loading ? translations.sending : translations.sendButton}
                 </button>
               </form>
+            </div>
+
+            {/* Informations de contact */}
+            <div className="space-y-8">
+              <div className="bg-gradient-to-br from-green-50 to-orange-50 dark:from-green-900/20 dark:to-orange-900/20 rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                  {translations.contactInfo}
+                </h2>
+
+                <div className="space-y-6">
+                  {/* Adresse */}
+                  {settings.contact_address && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-green-600 text-white rounded-lg">
+                        <MapPin size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                          {translations.address}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          {settings.contact_address}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Téléphone */}
+                  {settings.contact_phone && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-orange-500 text-white rounded-lg">
+                        <Phone size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                          {translations.phone}
+                        </h3>
+                        <a
+                          href={`tel:${settings.contact_phone}`}
+                          className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
+                        >
+                          {settings.contact_phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Email */}
+                  {settings.contact_email && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-green-600 text-white rounded-lg">
+                        <Mail size={24} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                          {translations.email}
+                        </h3>
+                        <a
+                          href={`mailto:${settings.contact_email}`}
+                          className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
+                        >
+                          {settings.contact_email}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Image décorative */}
+              <div className="hidden lg:block">
+                <img
+                  src="https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?w=600&h=400&fit=crop"
+                  alt="Contact"
+                  className="w-full h-64 object-cover rounded-lg shadow-lg"
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -29,6 +29,8 @@ import ProductForm from './pages/admin/ProductForm';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminPages from './pages/admin/AdminPages';
+import AdminSettings from './pages/admin/AdminSettings';
 
 function App() {
   return (
@@ -43,60 +45,103 @@ function App() {
                   <Route path="/catalog" element={<Catalog />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={
-                    <ProtectedRoute>
-                      <Checkout />
-                    </ProtectedRoute>
-                  } />
+                  <Route
+                    path="/checkout"
+                    element={
+                      <ProtectedRoute>
+                        <Checkout />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
-                  <Route path="/account" element={
-                    <ProtectedRoute>
-                      <Account />
-                    </ProtectedRoute>
-                  } />
+                  <Route
+                    path="/account"
+                    element={
+                      <ProtectedRoute>
+                        <Account />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/legal" element={<Legal />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
-                  
+
                   {/* Admin Routes */}
-                  <Route path="/admin" element={
-                    <ProtectedRoute adminOnly>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/products" element={
-                    <ProtectedRoute adminOnly>
-                      <AdminProducts />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/products/new" element={
-                    <ProtectedRoute adminOnly>
-                      <ProductForm />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/products/edit/:id" element={
-                    <ProtectedRoute adminOnly>
-                      <ProductForm />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/categories" element={
-                    <ProtectedRoute adminOnly>
-                      <AdminCategories />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/orders" element={
-                    <ProtectedRoute adminOnly>
-                      <AdminOrders />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/users" element={
-                    <ProtectedRoute adminOnly>
-                      <AdminUsers />
-                    </ProtectedRoute>
-                  } />
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/products"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminProducts />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/products/new"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <ProductForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/products/edit/:id"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <ProductForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/categories"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminCategories />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/orders"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminOrders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminUsers />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/pages"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminPages />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/settings"
+                    element={
+                      <ProtectedRoute adminOnly>
+                        <AdminSettings />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
               </Layout>
             </CartProvider>
@@ -108,4 +153,3 @@ function App() {
 }
 
 export default App;
-

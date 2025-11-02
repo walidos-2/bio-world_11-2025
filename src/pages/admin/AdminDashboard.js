@@ -19,7 +19,7 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const response = await axios.get(`${API_URL}/admin/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setStats(response.data);
     } catch (error) {
@@ -43,29 +43,32 @@ const AdminDashboard = () => {
       value: stats?.total_orders || 0,
       icon: ShoppingBag,
       color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-      link: '/admin/orders'
+      link: '/admin/orders',
     },
     {
       title: t('admin.pendingOrders'),
       value: stats?.pending_orders || 0,
       icon: ClipboardList,
-      color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-      link: '/admin/orders?status=pending'
+      color:
+        'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+      link: '/admin/orders?status=pending',
     },
     {
       title: t('admin.totalProducts'),
       value: stats?.total_products || 0,
       icon: Package,
-      color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-      link: '/admin/products'
+      color:
+        'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+      link: '/admin/products',
     },
     {
       title: t('admin.totalUsers'),
       value: stats?.total_users || 0,
       icon: Users,
-      color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-      link: '/admin/users'
-    }
+      color:
+        'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+      link: '/admin/users',
+    },
   ];
 
   return (
@@ -93,7 +96,9 @@ const AdminDashboard = () => {
                       {card.value}
                     </p>
                   </div>
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${card.color}`}>
+                  <div
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${card.color}`}
+                  >
                     <Icon size={24} />
                   </div>
                 </div>
@@ -124,7 +129,23 @@ const AdminDashboard = () => {
                 to="/admin/categories"
                 className="block px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-medium transition-colors text-center"
               >
-                {language === 'fr' ? 'Gérer les catégories' : 'Manage Categories'}
+                {language === 'fr'
+                  ? 'Gérer les catégories'
+                  : 'Manage Categories'}
+              </Link>
+
+              {/* Liens ajoutés pour /admin/pages et /admin/settings */}
+              <Link
+                to="/admin/pages"
+                className="block px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-md font-medium transition-colors text-center"
+              >
+                {language === 'fr' ? 'Gérer les Pages' : 'Manage Pages'}
+              </Link>
+              <Link
+                to="/admin/settings"
+                className="block px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition-colors text-center"
+              >
+                {language === 'fr' ? 'Paramètres du Site' : 'Site Settings'}
               </Link>
             </div>
           </div>
@@ -136,7 +157,7 @@ const AdminDashboard = () => {
             <div className="space-y-4 text-gray-600 dark:text-gray-400">
               <p>
                 {language === 'fr'
-                  ? 'Bienvenue dans le panneau d\'administration Bio-World. Ici vous pouvez gérer vos produits, catégories, commandes et utilisateurs.'
+                  ? "Bienvenue dans le panneau d'administration Bio-World. Ici vous pouvez gérer vos produits, catégories, commandes et utilisateurs."
                   : 'Welcome to the Bio-World administration panel. Here you can manage your products, categories, orders and users.'}
               </p>
               <p className="text-sm">
