@@ -3,7 +3,18 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import API_URL from '../../config';
-import { Users, Mail, Phone, MapPin, Edit2, Trash2, Plus, Key, Shield } from 'lucide-react';
+import {
+  Users,
+  Mail,
+  Phone,
+  MapPin,
+  Edit2,
+  Trash2,
+  Plus,
+  Key,
+  Shield,
+  Crown,
+} from 'lucide-react';
 
 const AdminUsers = () => {
   const { language, t } = useLanguage();
@@ -22,9 +33,12 @@ const AdminUsers = () => {
     city: '',
     postal_code: '',
     country: 'Tunisie',
-    role: 'user'
+    role: 'user',
   });
   const [error, setError] = useState('');
+
+  // ✅ ID du Super Admin (ne peut être modifié/supprimé)
+  const SUPER_ADMIN_ID = 'c9bcecfc-130c-4952-af9a-89bc40e3360a'; // Changez par l'ID de votre Super Admin
 
   useEffect(() => {
     fetchUsers();
@@ -33,7 +47,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(`${API_URL}/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data);
     } catch (error) {
@@ -44,6 +58,16 @@ const AdminUsers = () => {
   };
 
   const handleOpenModal = (user = null) => {
+    // ✅ PROTECTION : Empêcher la modification du Super Admin
+    if (user && user.id === SUPER_ADMIN_ID) {
+      alert(
+        language === 'fr'
+          ? '🛡️ Le compte Super Admin ne peut pas être modifié depuis cette interface'
+          : '🛡️ Super Admin account cannot be modified from this interface'
+      );
+      return;
+    }
+
     if (user) {
       setEditingUser(user);
       setFormData({
@@ -56,7 +80,7 @@ const AdminUsers = () => {
         city: user.city || '',
         postal_code: user.postal_code || '',
         country: user.country || 'Tunisie',
-        role: user.role || 'user'
+        role: user.role || 'user',
       });
     } else {
       setEditingUser(null);
@@ -70,7 +94,7 @@ const AdminUsers = () => {
         city: '',
         postal_code: '',
         country: 'Tunisie',
-        role: 'user'
+        role: 'user',
       });
     }
     setError('');
@@ -85,9 +109,9 @@ const AdminUsers = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -103,21 +127,29 @@ const AdminUsers = () => {
           delete updateData.password; // Don't update password if empty
         }
         delete updateData.email; // Can't change email
-        
-        await axios.put(`${API_URL}/admin/users/${editingUser.id}`, updateData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+
+        await axios.put(
+          `${API_URL}/admin/users/${editingUser.id}`,
+          updateData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       } else {
         // Create new user
         if (!formData.password) {
-          setError(language === 'fr' ? 'Le mot de passe est requis' : 'Password is required');
+          setError(
+            language === 'fr'
+              ? 'Le mot de passe est requis'
+              : 'Password is required'
+          );
           return;
         }
         await axios.post(`${API_URL}/admin/users`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
-      
+
       fetchUsers();
       handleCloseModal();
     } catch (err) {
@@ -126,26 +158,52 @@ const AdminUsers = () => {
   };
 
   const handleDelete = async (userId, userName) => {
-    if (!window.confirm(
-      language === 'fr' 
-        ? `Êtes-vous sûr de vouloir supprimer l'utilisateur ${userName} ?`
-        : `Are you sure you want to delete user ${userName}?`
-    )) {
+    // ✅ PROTECTION : Empêcher la suppression du Super Admin
+    if (userId === SUPER_ADMIN_ID) {
+      alert(
+        language === 'fr'
+          ? '🛡️ Le compte Super Admin ne peut pas être supprimé'
+          : '🛡️ Super Admin account cannot be deleted'
+      );
+      return;
+    }
+
+    if (
+      !window.confirm(
+        language === 'fr'
+          ? `Êtes-vous sûr de vouloir supprimer l'utilisateur ${userName} ?`
+          : `Are you sure you want to delete user ${userName}?`
+      )
+    ) {
       return;
     }
 
     try {
       await axios.delete(`${API_URL}/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(users.filter(u => u.id !== userId));
+      setUsers(users.filter((u) => u.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert(language === 'fr' ? 'Erreur lors de la suppression' : 'Error deleting user');
+      alert(
+        language === 'fr'
+          ? 'Erreur lors de la suppression'
+          : 'Error deleting user'
+      );
     }
   };
 
   const handleResetPassword = async (userId, userName) => {
+    // ✅ PROTECTION : Empêcher le changement de mot de passe du Super Admin
+    if (userId === SUPER_ADMIN_ID) {
+      alert(
+        language === 'fr'
+          ? '🛡️ Le mot de passe du Super Admin ne peut pas être modifié depuis cette interface'
+          : '🛡️ Super Admin password cannot be changed from this interface'
+      );
+      return;
+    }
+
     const newPassword = window.prompt(
       language === 'fr'
         ? `Nouveau mot de passe pour ${userName}:`
@@ -160,21 +218,41 @@ const AdminUsers = () => {
         { password: newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert(language === 'fr' ? 'Mot de passe modifié avec succès' : 'Password changed successfully');
+      alert(
+        language === 'fr'
+          ? 'Mot de passe modifié avec succès'
+          : 'Password changed successfully'
+      );
     } catch (error) {
       console.error('Error resetting password:', error);
-      alert(language === 'fr' ? 'Erreur lors du changement de mot de passe' : 'Error changing password');
+      alert(
+        language === 'fr'
+          ? 'Erreur lors du changement de mot de passe'
+          : 'Error changing password'
+      );
     }
   };
 
   const handleToggleRole = async (userId, currentRole, userName) => {
+    // ✅ PROTECTION : Empêcher le changement de rôle du Super Admin
+    if (userId === SUPER_ADMIN_ID) {
+      alert(
+        language === 'fr'
+          ? '🛡️ Le rôle du Super Admin ne peut pas être modifié'
+          : '🛡️ Super Admin role cannot be changed'
+      );
+      return;
+    }
+
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    
-    if (!window.confirm(
-      language === 'fr'
-        ? `Changer le rôle de ${userName} en ${newRole} ?`
-        : `Change ${userName}'s role to ${newRole}?`
-    )) {
+
+    if (
+      !window.confirm(
+        language === 'fr'
+          ? `Changer le rôle de ${userName} en ${newRole} ?`
+          : `Change ${userName}'s role to ${newRole}?`
+      )
+    ) {
       return;
     }
 
@@ -187,7 +265,11 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error changing role:', error);
-      alert(language === 'fr' ? 'Erreur lors du changement de rôle' : 'Error changing role');
+      alert(
+        language === 'fr'
+          ? 'Erreur lors du changement de rôle'
+          : 'Error changing role'
+      );
     }
   };
 
@@ -220,32 +302,58 @@ const AdminUsers = () => {
           <div className="bg-white dark:bg-gray-900 rounded-lg p-12 shadow-md text-center">
             <Users size={64} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              {language === 'fr' ? 'Aucun utilisateur pour le moment' : 'No users yet'}
+              {language === 'fr'
+                ? 'Aucun utilisateur pour le moment'
+                : 'No users yet'}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {users.map(user => (
+            {users.map((user) => (
               <div
                 key={user.id}
-                className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-md"
+                className={`bg-white dark:bg-gray-900 rounded-lg p-6 shadow-md ${
+                  user.id === SUPER_ADMIN_ID
+                    ? 'ring-2 ring-purple-500 ring-offset-2 dark:ring-offset-gray-800'
+                    : ''
+                }`}
                 data-testid={`user-${user.id}`}
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-600 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
-                    {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+                      user.id === SUPER_ADMIN_ID
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-500'
+                        : 'bg-gradient-to-r from-green-600 to-orange-500'
+                    }`}
+                  >
+                    {user.id === SUPER_ADMIN_ID ? (
+                      <Crown size={24} />
+                    ) : (
+                      `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-900 dark:text-white">
                       {user.first_name} {user.last_name}
                     </h3>
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      user.role === 'admin'
-                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200'
-                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200'
-                    }`}>
-                      {user.role}
-                    </span>
+                    {/* ✅ BADGE SUPER ADMIN */}
+                    {user.id === SUPER_ADMIN_ID ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold">
+                        <Crown size={12} />
+                        {language === 'fr' ? 'Super Admin' : 'Super Admin'}
+                      </span>
+                    ) : (
+                      <span
+                        className={`inline-block px-2 py-1 text-xs rounded-full ${
+                          user.role === 'admin'
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200'
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -263,45 +371,86 @@ const AdminUsers = () => {
                   {user.city && (
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <MapPin size={16} />
-                      <span>{user.city}, {user.country || 'Tunisie'}</span>
+                      <span>
+                        {user.city}, {user.country || 'Tunisie'}
+                      </span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => handleOpenModal(user)}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-md transition-colors"
-                    title={language === 'fr' ? 'Modifier' : 'Edit'}
-                  >
-                    <Edit2 size={14} />
-                    {language === 'fr' ? 'Modifier' : 'Edit'}
-                  </button>
-                  
-                  <button
-                    onClick={() => handleResetPassword(user.id, `${user.first_name} ${user.last_name}`)}
-                    className="flex items-center justify-center p-2 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 rounded-md transition-colors"
-                    title={language === 'fr' ? 'Changer mot de passe' : 'Reset password'}
-                  >
-                    <Key size={16} />
-                  </button>
+                {/* ✅ PROTECTION : Afficher les boutons SEULEMENT si ce n'est PAS le Super Admin */}
+                {user.id === SUPER_ADMIN_ID ? (
+                  <div className="flex items-center justify-center gap-2 pt-4 border-t border-purple-200 dark:border-purple-700">
+                    <div className="text-center py-2">
+                      <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
+                        🛡️{' '}
+                        {language === 'fr'
+                          ? 'Compte protégé'
+                          : 'Protected account'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {language === 'fr'
+                          ? 'Ne peut être modifié ou supprimé'
+                          : 'Cannot be modified or deleted'}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => handleOpenModal(user)}
+                      className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-md transition-colors"
+                      title={language === 'fr' ? 'Modifier' : 'Edit'}
+                    >
+                      <Edit2 size={14} />
+                      {language === 'fr' ? 'Modifier' : 'Edit'}
+                    </button>
 
-                  <button
-                    onClick={() => handleToggleRole(user.id, user.role, `${user.first_name} ${user.last_name}`)}
-                    className="flex items-center justify-center p-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-800 dark:text-purple-200 rounded-md transition-colors"
-                    title={language === 'fr' ? 'Changer rôle' : 'Change role'}
-                  >
-                    <Shield size={16} />
-                  </button>
-                  
-                  <button
-                    onClick={() => handleDelete(user.id, `${user.first_name} ${user.last_name}`)}
-                    className="flex items-center justify-center p-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-200 rounded-md transition-colors"
-                    title={language === 'fr' ? 'Supprimer' : 'Delete'}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                    <button
+                      onClick={() =>
+                        handleResetPassword(
+                          user.id,
+                          `${user.first_name} ${user.last_name}`
+                        )
+                      }
+                      className="flex items-center justify-center p-2 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 rounded-md transition-colors"
+                      title={
+                        language === 'fr'
+                          ? 'Changer mot de passe'
+                          : 'Reset password'
+                      }
+                    >
+                      <Key size={16} />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleToggleRole(
+                          user.id,
+                          user.role,
+                          `${user.first_name} ${user.last_name}`
+                        )
+                      }
+                      className="flex items-center justify-center p-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-800 dark:text-purple-200 rounded-md transition-colors"
+                      title={language === 'fr' ? 'Changer rôle' : 'Change role'}
+                    >
+                      <Shield size={16} />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          user.id,
+                          `${user.first_name} ${user.last_name}`
+                        )
+                      }
+                      className="flex items-center justify-center p-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-200 rounded-md transition-colors"
+                      title={language === 'fr' ? 'Supprimer' : 'Delete'}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -314,8 +463,12 @@ const AdminUsers = () => {
               <div className="p-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   {editingUser
-                    ? (language === 'fr' ? 'Modifier l\'utilisateur' : 'Edit User')
-                    : (language === 'fr' ? 'Ajouter un utilisateur' : 'Add User')}
+                    ? language === 'fr'
+                      ? "Modifier l'utilisateur"
+                      : 'Edit User'
+                    : language === 'fr'
+                    ? 'Ajouter un utilisateur'
+                    : 'Add User'}
                 </h2>
 
                 {error && (
@@ -375,7 +528,9 @@ const AdminUsers = () => {
                       {t('auth.password')} {!editingUser && '*'}
                       {editingUser && (
                         <span className="text-xs text-gray-500">
-                          {language === 'fr' ? ' (laisser vide pour ne pas changer)' : ' (leave empty to keep current)'}
+                          {language === 'fr'
+                            ? ' (laisser vide pour ne pas changer)'
+                            : ' (leave empty to keep current)'}
                         </span>
                       )}
                     </label>
@@ -414,8 +569,12 @@ const AdminUsers = () => {
                         onChange={handleChange}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
                       >
-                        <option value="user">{language === 'fr' ? 'Utilisateur' : 'User'}</option>
-                        <option value="admin">{language === 'fr' ? 'Administrateur' : 'Admin'}</option>
+                        <option value="user">
+                          {language === 'fr' ? 'Utilisateur' : 'User'}
+                        </option>
+                        <option value="admin">
+                          {language === 'fr' ? 'Administrateur' : 'Admin'}
+                        </option>
                       </select>
                     </div>
                   </div>
