@@ -266,7 +266,7 @@ const Contact = () => {
               {/* Image décorative */}
               <div className="hidden lg:block">
                 <img
-                  src="https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?w=600&h=400&fit=crop"
+                  src="https://bio-world.eu/images-mas/happyness-bio-world-min.jpg"
                   alt="Contact"
                   className="w-full h-64 object-cover rounded-lg shadow-lg"
                 />

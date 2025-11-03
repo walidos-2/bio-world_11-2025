@@ -11,7 +11,7 @@ const Account = () => {
   const { language, t } = useLanguage();
   const { user, token, updateProfile, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  
+
   const [activeTab, setActiveTab] = useState('profile');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ const Account = () => {
     address: '',
     city: '',
     postal_code: '',
-    country: ''
+    country: '',
   });
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -42,7 +42,7 @@ const Account = () => {
         address: user.address || '',
         city: user.city || '',
         postal_code: user.postal_code || '',
-        country: user.country || ''
+        country: user.country || '',
       });
     }
   }, [user]);
@@ -57,11 +57,33 @@ const Account = () => {
     setLoading(true);
     try {
       const response = await axios.get(`${API}/orders`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setOrders(response.data);
+
+      // ✅ CORRECTION : Gestion robuste de la réponse
+      console.log('Orders response:', response.data);
+
+      // Si la réponse est un tableau
+      if (Array.isArray(response.data)) {
+        setOrders(response.data);
+      }
+      // Si la réponse est un objet avec une propriété "orders"
+      else if (response.data && Array.isArray(response.data.orders)) {
+        setOrders(response.data.orders);
+      }
+      // Si la réponse est un objet avec une propriété "data"
+      else if (response.data && Array.isArray(response.data.data)) {
+        setOrders(response.data.data);
+      }
+      // Sinon, tableau vide
+      else {
+        console.warn('Unexpected orders format:', response.data);
+        setOrders([]);
+      }
     } catch (error) {
       console.error('Error fetching orders:', error);
+      // ✅ CORRECTION : En cas d'erreur, on met un tableau vide
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -70,7 +92,7 @@ const Account = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -80,25 +102,36 @@ const Account = () => {
     setMessage({ type: '', text: '' });
 
     const result = await updateProfile(formData);
-    
+
     if (result.success) {
-      setMessage({ type: 'success', text: language === 'fr' ? 'Profil mis à jour avec succès' : 'Profile updated successfully' });
+      setMessage({
+        type: 'success',
+        text:
+          language === 'fr'
+            ? 'Profil mis à jour avec succès'
+            : 'Profile updated successfully',
+      });
       setEditing(false);
     } else {
       setMessage({ type: 'error', text: result.error });
     }
-    
+
     setLoading(false);
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200',
-      confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
-      processing: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200',
-      shipped: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200',
-      delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
-      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'
+      pending:
+        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200',
+      confirmed:
+        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
+      processing:
+        'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200',
+      shipped:
+        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200',
+      delivered:
+        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
+      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
     };
     return colors[status] || colors.pending;
   };
@@ -133,7 +166,7 @@ const Account = () => {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600 dark:bg-green-400"></div>
             )}
           </button>
-          
+
           <button
             onClick={() => setActiveTab('orders')}
             className={`pb-4 px-4 font-semibold transition-colors relative ${
@@ -174,11 +207,13 @@ const Account = () => {
               </div>
 
               {message.text && (
-                <div className={`mb-4 p-3 rounded-md ${
-                  message.type === 'success'
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
-                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
-                }`}>
+                <div
+                  className={`mb-4 p-3 rounded-md ${
+                    message.type === 'success'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                  }`}
+                >
                   {message.text}
                 </div>
               )}
@@ -320,7 +355,7 @@ const Account = () => {
                           address: user.address || '',
                           city: user.city || '',
                           postal_code: user.postal_code || '',
-                          country: user.country || ''
+                          country: user.country || '',
                         });
                       }}
                       className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-md font-semibold transition-colors"
@@ -346,16 +381,18 @@ const Account = () => {
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent"></div>
               </div>
-            ) : orders.length === 0 ? (
+            ) : !Array.isArray(orders) || orders.length === 0 ? (
               <div className="bg-white dark:bg-gray-900 rounded-lg p-12 shadow-md text-center">
                 <Package size={64} className="mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  {language === 'fr' ? 'Aucune commande pour le moment' : 'No orders yet'}
+                  {language === 'fr'
+                    ? 'Aucune commande pour le moment'
+                    : 'No orders yet'}
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {orders.map(order => (
+                {orders.map((order) => (
                   <div
                     key={order.id}
                     className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-md"
@@ -364,35 +401,57 @@ const Account = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {t('order.orderNumber')}: <span className="font-semibold">{order.id}</span>
+                          {t('order.orderNumber')}:{' '}
+                          <span className="font-semibold">{order.id}</span>
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {new Date(order.created_at).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US')}
+                          {new Date(order.created_at).toLocaleDateString(
+                            language === 'fr' ? 'fr-FR' : 'en-US'
+                          )}
                         </p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                          order.status
+                        )}`}
+                      >
                         {t(`order.${order.status}`)}
                       </span>
                     </div>
 
-                    <div className="space-y-2 mb-4">
-                      {order.items.map((item, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span className="text-gray-700 dark:text-gray-300">
-                            {language === 'fr' ? 'Produit' : 'Product'} x{item.quantity}
-                          </span>
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {(item.price * item.quantity).toFixed(3)} DT
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    {/* ✅ CORRECTION : Vérifier que order.items existe et est un tableau */}
+                    {Array.isArray(order.items) && order.items.length > 0 && (
+                      <div className="space-y-2 mb-4">
+                        {order.items.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between text-sm"
+                          >
+                            <span className="text-gray-700 dark:text-gray-300">
+                              {item.product_name ||
+                                (language === 'fr'
+                                  ? 'Produit'
+                                  : 'Product')}{' '}
+                              x{item.quantity}
+                            </span>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {(item.price * item.quantity).toFixed(3)} DT
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                       <div className="flex justify-between">
-                        <span className="font-bold text-gray-900 dark:text-white">{t('common.total')}</span>
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {t('common.total')}
+                        </span>
                         <span className="font-bold text-green-600 dark:text-green-400">
-                          {order.total_amount.toFixed(3)} DT
+                          {order.total_amount
+                            ? order.total_amount.toFixed(3)
+                            : '0.000'}{' '}
+                          DT
                         </span>
                       </div>
                     </div>
