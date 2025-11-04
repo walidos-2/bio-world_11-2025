@@ -43,6 +43,12 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/catalog" element={<Catalog />} />
+                  {/* Changement : URL avec slug au lieu de ID */}
+                  <Route
+                    path="/product/:category/:slug"
+                    element={<ProductDetail />}
+                  />
+                  {/* Garder l'ancienne route pour la rétrocompatibilité */}
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route

@@ -5,13 +5,14 @@ import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
 import { ShoppingCart, Minus, Plus, ArrowLeft } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+// Configuration de l'API - Utilisation de la même URL que Catalog.js
+const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { language, t } = useLanguage();
   const { addToCart } = useCart();
-  
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -23,7 +24,7 @@ const ProductDetail = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(`${API}/products/${id}`);
+      const response = await axios.get(`${API_URL}/products/${id}`);
       setProduct(response.data);
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -54,8 +55,12 @@ const ProductDetail = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             {t('catalog.noProducts')}
           </h2>
-          <Link to="/catalog" className="text-green-600 hover:text-green-700">
-            {t('cart.continueShopping')}
+          <Link
+            to="/catalog"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <ArrowLeft size={20} />
+            Retour au catalogue
           </Link>
         </div>
       </div>
@@ -65,13 +70,13 @@ const ProductDetail = () => {
   return (
     <div className="py-8" data-testid="product-detail-page">
       <div className="container mx-auto px-4">
-        {/* Back button */}
+        {/* Bouton retour amélioré */}
         <Link
           to="/catalog"
-          className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 mb-6"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors mb-6"
         >
           <ArrowLeft size={20} />
-          {t('cart.continueShopping')}
+          Retour au catalogue
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -84,8 +89,8 @@ const ProductDetail = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            
-            {product.images.length > 1 && (
+
+            {product.images && product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-4">
                 {product.images.map((image, index) => (
                   <button
@@ -99,7 +104,9 @@ const ProductDetail = () => {
                   >
                     <img
                       src={image}
-                      alt={`${language === 'fr' ? product.name_fr : product.name_en} ${index + 1}`}
+                      alt={`${
+                        language === 'fr' ? product.name_fr : product.name_en
+                      } ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -110,25 +117,47 @@ const ProductDetail = () => {
 
           {/* Product Info */}
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4" data-testid="product-name">
+            <h1
+              className="text-4xl font-bold text-gray-900 dark:text-white mb-4"
+              data-testid="product-name"
+            >
               {language === 'fr' ? product.name_fr : product.name_en}
             </h1>
-            
+
+            {/* Description courte - NOUVEAU */}
+            {product.short_description_fr && (
+              <p className="text-xl text-gray-600 dark:text-gray-400 mb-6 font-medium leading-relaxed">
+                {language === 'fr'
+                  ? product.short_description_fr
+                  : product.short_description_en}
+              </p>
+            )}
+
             <div className="flex items-center gap-4 mb-6">
-              <span className="text-4xl font-bold text-green-600 dark:text-green-400" data-testid="product-price">
-                {product.price.toFixed(3)} DT
+              <span
+                className="text-4xl font-bold text-green-600 dark:text-green-400"
+                data-testid="product-price"
+              >
+                {product.price ? product.price.toFixed(3) : '0.000'} DT
               </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                product.in_stock
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                  : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-              }`}>
-                {product.in_stock ? t('product.inStock') : t('product.availableOnOrder')}
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  product.in_stock
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                }`}
+              >
+                {product.in_stock
+                  ? t('product.inStock')
+                  : t('product.availableOnOrder')}
               </span>
             </div>
 
+            {/* Description longue */}
             <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              {language === 'fr' ? product.description_fr : product.description_en}
+              {language === 'fr'
+                ? product.description_fr
+                : product.description_en}
             </p>
 
             {/* Quantity selector */}
@@ -144,7 +173,10 @@ const ProductDetail = () => {
                 >
                   <Minus size={20} />
                 </button>
-                <span className="text-2xl font-semibold w-12 text-center" data-testid="quantity-display">
+                <span
+                  className="text-2xl font-semibold w-12 text-center"
+                  data-testid="quantity-display"
+                >
                   {quantity}
                 </span>
                 <button
@@ -177,10 +209,14 @@ const ProductDetail = () => {
                 />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {language === 'fr' ? 'Produit certifié Bio-World' : 'Bio-World Certified Product'}
+                    {language === 'fr'
+                      ? 'Produit certifié Bio-World'
+                      : 'Bio-World Certified Product'}
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {language === 'fr' ? 'Qualité biologique garantie' : 'Guaranteed organic quality'}
+                    {language === 'fr'
+                      ? 'Qualité biologique garantie'
+                      : 'Guaranteed organic quality'}
                   </p>
                 </div>
               </div>

@@ -6,22 +6,23 @@ import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
 import { CheckCircle } from 'lucide-react';
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+// CORRECTION : Utiliser la même URL API que partout ailleurs
+const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 const Checkout = () => {
   const { language, t } = useLanguage();
   const { user, token } = useAuth();
   const { cart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     delivery_address: user?.address || '',
     delivery_city: user?.city || '',
     delivery_postal_code: user?.postal_code || '',
-    delivery_country: user?.country || 'France',
+    delivery_country: user?.country || 'Tunisie',
     phone: user?.phone || '',
     email: user?.email || '',
-    comments: ''
+    comments: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +32,7 @@ const Checkout = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -43,22 +44,33 @@ const Checkout = () => {
     try {
       const orderData = {
         ...formData,
-        items: cart.map(item => ({
+        items: cart.map((item) => ({
           product_id: item.product.id,
           quantity: item.quantity,
-          price: item.product.price
-        }))
+          price: item.product.price,
+          product_name:
+            language === 'fr' ? item.product.name_fr : item.product.name_en,
+        })),
       };
 
-      const response = await axios.post(`${API}/orders`, orderData, {
-        headers: { Authorization: `Bearer ${token}` }
+      // CORRECTION : Utiliser API_URL au lieu de API
+      const response = await axios.post(`${API_URL}/orders`, orderData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       setOrderId(response.data.id);
       setSuccess(true);
       clearCart();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Erreur lors de la création de la commande');
+      console.error('Erreur création commande:', err);
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.detail ||
+          'Erreur lors de la création de la commande'
+      );
     } finally {
       setLoading(false);
     }
@@ -68,15 +80,19 @@ const Checkout = () => {
     return (
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 text-center">
-          <CheckCircle size={64} className="mx-auto text-green-600 dark:text-green-400 mb-4" />
+          <CheckCircle
+            size={64}
+            className="mx-auto text-green-600 dark:text-green-400 mb-4"
+          />
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             {t('order.confirmation')}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-2">
-            {t('order.orderNumber')}: <span className="font-semibold">{orderId}</span>
+            {t('order.orderNumber')}:{' '}
+            <span className="font-semibold">{orderId}</span>
           </p>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            {language === 'fr' 
+            {language === 'fr'
               ? 'Nous vous contacterons prochainement pour confirmer votre commande.'
               : 'We will contact you shortly to confirm your order.'}
           </p>
@@ -97,7 +113,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="py-8" data-testid="checkout-page">
+    <div className="py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
           {t('order.title')}
@@ -129,7 +145,6 @@ const Checkout = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                    data-testid="address-input"
                   />
                 </div>
 
@@ -145,7 +160,6 @@ const Checkout = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      data-testid="city-input"
                     />
                   </div>
 
@@ -160,7 +174,6 @@ const Checkout = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      data-testid="postal-code-input"
                     />
                   </div>
                 </div>
@@ -176,7 +189,6 @@ const Checkout = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                    data-testid="country-input"
                   />
                 </div>
 
@@ -192,7 +204,6 @@ const Checkout = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      data-testid="phone-input"
                     />
                   </div>
 
@@ -207,7 +218,6 @@ const Checkout = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      data-testid="email-input"
                     />
                   </div>
                 </div>
@@ -222,8 +232,11 @@ const Checkout = () => {
                     onChange={handleChange}
                     rows={4}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                    placeholder={language === 'fr' ? 'Remarques optionnelles...' : 'Optional remarks...'}
-                    data-testid="comments-input"
+                    placeholder={
+                      language === 'fr'
+                        ? 'Remarques optionnelles...'
+                        : 'Optional remarks...'
+                    }
                   ></textarea>
                 </div>
 
@@ -231,7 +244,6 @@ const Checkout = () => {
                   type="submit"
                   disabled={loading}
                   className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-semibold transition-colors"
-                  data-testid="submit-order-button"
                 >
                   {loading ? t('common.loading') : t('order.submit')}
                 </button>
@@ -247,10 +259,16 @@ const Checkout = () => {
               </h2>
 
               <div className="space-y-4 mb-6">
-                {cart.map(item => (
-                  <div key={item.product.id} className="flex justify-between text-sm">
+                {cart.map((item) => (
+                  <div
+                    key={item.product.id}
+                    className="flex justify-between text-sm"
+                  >
                     <span className="text-gray-600 dark:text-gray-400">
-                      {language === 'fr' ? item.product.name_fr : item.product.name_en} x{item.quantity}
+                      {language === 'fr'
+                        ? item.product.name_fr
+                        : item.product.name_en}{' '}
+                      x{item.quantity}
                     </span>
                     <span className="font-semibold text-gray-900 dark:text-white">
                       {(item.product.price * item.quantity).toFixed(3)} DT

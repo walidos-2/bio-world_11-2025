@@ -1,6 +1,6 @@
 // pages/Catalog.js
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 
 // Configuration de l'API
@@ -65,6 +65,24 @@ export default function Catalog() {
     };
     fetchProducts();
   }, [selectedCategory]);
+
+  // Fonction pour générer l'URL du produit
+  const getProductUrl = (product) => {
+    // Si le produit a un slug et une catégorie, utiliser la nouvelle URL
+    if (product.slug && product.category_name) {
+      // Créer un slug de catégorie à partir du nom
+      const categorySlug = product.category_name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-');
+
+      return `/product/${categorySlug}/${product.slug}`;
+    }
+
+    // Sinon, utiliser l'ancienne URL avec ID (rétrocompatibilité)
+    return `/product/${product.id}`;
+  };
 
   // Filtrer par recherche
   const searchedProducts = products.filter(
@@ -148,31 +166,55 @@ export default function Catalog() {
                 <div className="products-grid">
                   {searchedProducts.map((product) => (
                     <div key={product.id} className="product-card">
-                      {/* Image - CORRIGÉ : utilise images[0] au lieu de image */}
-                      <div className="product-image">
-                        <img
-                          src={
-                            product.images && product.images.length > 0
-                              ? product.images[0]
-                              : ''
-                          }
-                          alt={product.name_fr}
-                          onError={(e) => {
-                            e.target.src =
-                              'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGN0U5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM0QTdDMkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkJJTzwvdGV4dD4KPC9zdmc+';
-                          }}
-                        />
-                      </div>
+                      {/* Image - Maintenant cliquable */}
+                      <Link
+                        to={getProductUrl(product)}
+                        className="product-image-link"
+                      >
+                        <div className="product-image">
+                          <img
+                            src={
+                              product.images && product.images.length > 0
+                                ? product.images[0]
+                                : ''
+                            }
+                            alt={product.name_fr}
+                            onError={(e) => {
+                              e.target.src =
+                                'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGN0U5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM0QTdDMkEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkJJTzwvdGV4dD4KPC9zdmc+';
+                            }}
+                          />
+                        </div>
+                      </Link>
 
                       <div className="product-info">
-                        <h3 className="product-name">{product.name_fr}</h3>
-                        <p className="product-description">
-                          {product.short_description_fr}
-                        </p>
+                        {/* Titre cliquable */}
+                        <Link
+                          to={getProductUrl(product)}
+                          className="product-name-link"
+                        >
+                          <h3 className="product-name">{product.name_fr}</h3>
+                        </Link>
+
+                        {/* Description courte */}
+                        {product.short_description_fr && (
+                          <p className="product-description">
+                            {product.short_description_fr}
+                          </p>
+                        )}
+
+                        {/* Si pas de description courte, afficher un extrait de la description longue */}
+                        {!product.short_description_fr &&
+                          product.description_fr && (
+                            <p className="product-description">
+                              {product.description_fr.substring(0, 120)}...
+                            </p>
+                          )}
 
                         <div className="product-meta">
                           <div className="product-price">
-                            {product.price.toFixed(3)} DT
+                            {product.price ? product.price.toFixed(3) : '0.000'}{' '}
+                            DT
                           </div>
                           <div
                             className={`product-stock ${
@@ -196,7 +238,7 @@ export default function Catalog() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes spin {
           0% {
             transform: rotate(0deg);
@@ -365,7 +407,13 @@ export default function Catalog() {
           transition: transform 0.4s ease;
         }
 
-        .product-card:hover .product-image img {
+        .product-image-link {
+          display: block;
+          text-decoration: none;
+          cursor: pointer;
+        }
+
+        .product-image-link:hover .product-image img {
           transform: scale(1.08);
         }
 
@@ -376,12 +424,23 @@ export default function Catalog() {
           flex-direction: column;
         }
 
+        .product-name-link {
+          text-decoration: none;
+          color: inherit;
+        }
+
         .product-name {
           margin: 0 0 12px 0;
           font-size: 1.25rem;
           color: #2d5016;
           font-weight: 700;
           line-height: 1.3;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .product-name-link:hover .product-name {
+          color: #e67e22;
         }
 
         .product-description {
