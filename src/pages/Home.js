@@ -34,6 +34,21 @@ const Home = () => {
     }
   };
 
+  // Fonctions pour obtenir les textes dynamiques
+  const getProductName = (product) => {
+    return language === 'fr' ? product.name_fr : product.name_en;
+  };
+
+  const getProductDescription = (product) => {
+    return language === 'fr'
+      ? product.short_description_fr
+      : product.short_description_en;
+  };
+
+  const getCategoryName = (category) => {
+    return language === 'fr' ? category.name_fr : category.name_en;
+  };
+
   return (
     <div data-testid="home-page">
       {/* Hero Section */}
@@ -68,7 +83,7 @@ const Home = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 bg-white dark:bg-gray-950">
+      <section className="py-16 bg-white dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -89,7 +104,7 @@ const Home = () => {
                 <Link
                   key={category.id}
                   to={`/catalog?category_id=${category.id}`}
-                  className="group bg-gray-50 dark:bg-gray-900 rounded-xl p-8 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-600"
+                  className="group bg-gray-50 dark:bg-gray-800 rounded-xl p-8 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-600"
                   data-testid={`category-card-${category.slug}`}
                 >
                   <div className="text-center">
@@ -98,11 +113,7 @@ const Home = () => {
                       <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-br from-green-100 to-orange-100 dark:from-green-900 dark:to-orange-900 p-2 group-hover:scale-110 transition-transform duration-300">
                         <img
                           src={category.image_url}
-                          alt={
-                            language === 'fr'
-                              ? category.name_fr
-                              : category.name_en
-                          }
+                          alt={getCategoryName(category)}
                           className="w-full h-full object-cover rounded-full"
                           onError={(e) => {
                             // Si l'image ne charge pas, masquer l'img et afficher l'emoji
@@ -119,7 +130,7 @@ const Home = () => {
                       </div>
                     )}
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                      {language === 'fr' ? category.name_fr : category.name_en}
+                      {getCategoryName(category)}
                     </h3>
                   </div>
                 </Link>
@@ -130,7 +141,7 @@ const Home = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+      <section className="py-16 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -159,16 +170,14 @@ const Home = () => {
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
-                  className="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                  className="group bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
                   data-testid={`product-card-${product.slug}`}
                 >
                   <div className="aspect-square overflow-hidden bg-gray-200 dark:bg-gray-700">
                     {product.images && product.images.length > 0 ? (
                       <img
                         src={product.images[0]}
-                        alt={
-                          language === 'fr' ? product.name_fr : product.name_en
-                        }
+                        alt={getProductName(product)}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : (
@@ -179,18 +188,22 @@ const Home = () => {
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                      {language === 'fr' ? product.name_fr : product.name_en}
+                      {getProductName(product)}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                      {language === 'fr'
-                        ? product.short_description_fr
-                        : product.short_description_en}
+                      {getProductDescription(product)}
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {product.price.toFixed(3)} DT
+                        {product.price ? product.price.toFixed(3) : '0.000'} DT
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          product.in_stock
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                        }`}
+                      >
                         {product.in_stock
                           ? t('catalog.inStock')
                           : t('catalog.onOrder')}

@@ -39,117 +39,114 @@ function App() {
         <LanguageProvider>
           <AuthProvider>
             <CartProvider>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/catalog" element={<Catalog />} />
-                  {/* Changement : URL avec slug au lieu de ID */}
-                  <Route
-                    path="/product/:category/:slug"
-                    element={<ProductDetail />}
-                  />
-                  {/* Garder l'ancienne route pour la rétrocompatibilité */}
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route
-                    path="/checkout"
-                    element={
-                      <ProtectedRoute>
-                        <Checkout />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route
-                    path="/account"
-                    element={
-                      <ProtectedRoute>
-                        <Account />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/legal" element={<Legal />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
+              {/* Application du thème sur toute l'application */}
+              <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/catalog" element={<Catalog />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route
+                      path="/checkout"
+                      element={
+                        <ProtectedRoute>
+                          <Checkout />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route
+                      path="/account"
+                      element={
+                        <ProtectedRoute>
+                          <Account />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/legal" element={<Legal />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/privacy" element={<Privacy />} />
 
-                  {/* Admin Routes */}
-                  <Route
-                    path="/admin"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/products"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminProducts />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/products/new"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <ProductForm />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/products/edit/:id"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <ProductForm />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/categories"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminCategories />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/orders"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminOrders />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/users"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminUsers />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/pages"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminPages />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/settings"
-                    element={
-                      <ProtectedRoute adminOnly>
-                        <AdminSettings />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-              </Layout>
+                    {/* Admin Routes */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/products"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminProducts />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/products/new"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <ProductForm />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/products/edit/:id"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <ProductForm />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/categories"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminCategories />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/orders"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminOrders />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/users"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminUsers />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/pages"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminPages />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/settings"
+                      element={
+                        <ProtectedRoute adminOnly>
+                          <AdminSettings />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Routes>
+                </Layout>
+              </div>
             </CartProvider>
           </AuthProvider>
         </LanguageProvider>

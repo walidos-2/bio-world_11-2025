@@ -5,7 +5,7 @@ import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
 import { ShoppingCart, Minus, Plus, ArrowLeft } from 'lucide-react';
 
-// Configuration de l'API - Utilisation de la même URL que Catalog.js
+// Configuration de l'API
 const API_URL = process.env.REACT_APP_API_URL || 'https://bio-world.eu/api';
 
 const ProductDetail = () => {
@@ -40,9 +40,24 @@ const ProductDetail = () => {
     }
   };
 
+  // Fonctions pour obtenir les textes dynamiques
+  const getProductName = (product) => {
+    return language === 'fr' ? product.name_fr : product.name_en;
+  };
+
+  const getProductDescription = (product) => {
+    return language === 'fr' ? product.description_fr : product.description_en;
+  };
+
+  const getShortDescription = (product) => {
+    return language === 'fr'
+      ? product.short_description_fr
+      : product.short_description_en;
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent"></div>
       </div>
     );
@@ -50,7 +65,7 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             {t('catalog.noProducts')}
@@ -60,7 +75,7 @@ const ProductDetail = () => {
             className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
             <ArrowLeft size={20} />
-            Retour au catalogue
+            {t('cart.continueShopping')}
           </Link>
         </div>
       </div>
@@ -68,15 +83,18 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="py-8" data-testid="product-detail-page">
+    <div
+      className="py-8 bg-white dark:bg-gray-900 min-h-screen"
+      data-testid="product-detail-page"
+    >
       <div className="container mx-auto px-4">
-        {/* Bouton retour amélioré */}
+        {/* Back button */}
         <Link
           to="/catalog"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors mb-6"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors mb-6"
         >
           <ArrowLeft size={20} />
-          Retour au catalogue
+          {t('cart.continueShopping')}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -84,8 +102,14 @@ const ProductDetail = () => {
           <div>
             <div className="aspect-square rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 mb-4">
               <img
-                src={product.images[selectedImage] || product.images[0]}
-                alt={language === 'fr' ? product.name_fr : product.name_en}
+                src={
+                  product.images && product.images[selectedImage]
+                    ? product.images[selectedImage]
+                    : product.images && product.images[0]
+                    ? product.images[0]
+                    : ''
+                }
+                alt={getProductName(product)}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -104,9 +128,7 @@ const ProductDetail = () => {
                   >
                     <img
                       src={image}
-                      alt={`${
-                        language === 'fr' ? product.name_fr : product.name_en
-                      } ${index + 1}`}
+                      alt={`${getProductName(product)} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -121,15 +143,13 @@ const ProductDetail = () => {
               className="text-4xl font-bold text-gray-900 dark:text-white mb-4"
               data-testid="product-name"
             >
-              {language === 'fr' ? product.name_fr : product.name_en}
+              {getProductName(product)}
             </h1>
 
             {/* Description courte - NOUVEAU */}
-            {product.short_description_fr && (
+            {getShortDescription(product) && (
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-6 font-medium leading-relaxed">
-                {language === 'fr'
-                  ? product.short_description_fr
-                  : product.short_description_en}
+                {getShortDescription(product)}
               </p>
             )}
 
@@ -155,9 +175,7 @@ const ProductDetail = () => {
 
             {/* Description longue */}
             <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              {language === 'fr'
-                ? product.description_fr
-                : product.description_en}
+              {getProductDescription(product)}
             </p>
 
             {/* Quantity selector */}
